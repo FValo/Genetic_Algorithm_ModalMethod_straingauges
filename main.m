@@ -14,11 +14,12 @@ load report/clumped_plate_randomloads/modal_shape_dis_randomloads.rpt
 load report/clumped_plate_randomloads/modal_shape_strain_randomloads.rpt
 load report/clumped_plate_randomloads/strain_tot_randomloads.rpt
 load report/clumped_plate_randomloads/omega_randloads.mat
+load report/clumped_plate_randomloads/displ_tot_randomloads.rpt
 modal_shape_dis=modal_shape_dis_randomloads;
 modal_shape_strain=modal_shape_strain_randomloads;
 omega=omega_randloads;
 strain=strain_tot_randomloads;
-
+displ=displ_tot_randomloads;
 break
 end
 %______________________________________________________
@@ -29,11 +30,17 @@ end
 
 %_______________________________________________________
 %costruzione vettore colonna deformazioni
-
 def=zeros(size(strain,1)*3,1);
 n=1;
 for i=1:size(strain,1)
     def(n:n+2)=strain(i,2:end);
+    n=n+3;
+end
+%costruzione vettore colonna spostamenti
+displ_value=zeros(size(displ,1)*3,1);
+n=1;
+for i=1:size(displ,1)
+    displ_value(n:n+2)=displ(i,2:end);
     n=n+3;
 end
 %_______________________________________________________
@@ -43,11 +50,12 @@ end
 index=sort( uint64( [strain(:,1).*3-2; strain(:,1).*3-1; strain(:,1).*3] ) );
 index_dis=sort( uint64( [id_nodi.*3-2; id_nodi.*3-1; id_nodi.*3] ) );
 
+index=[35:40, 351:353, 401:403, 451:453]';  %posizioni migliori per misura def
 
 %_______________________________________________________
 % criterio di selezione modale
 % determinazione modi più significativi
-[modi,E_modi,E_rappr] = scelta_modi(ms_str(index,:),def,omega);
+[modi,E_modi,E_rappr] = scelta_modi(ms_str(index,:),def(index),omega);
 %_______________________________________________________
 
 
@@ -56,6 +64,6 @@ index_dis=sort( uint64( [id_nodi.*3-2; id_nodi.*3-1; id_nodi.*3] ) );
 pseudo_inversa = ms_dis(index_dis,modi) / ...
                 ( ms_str(index,modi)' * ms_str(index,modi) ) * ...
                  ms_str(index,modi)' ;
-w = pseudo_inversa * def;
+w = pseudo_inversa * def(index);
 
-
+err=100*sqrt(1/1500 * sum( ( (w-displ_value)/max(abs(displ_value)) ).^2 ) );

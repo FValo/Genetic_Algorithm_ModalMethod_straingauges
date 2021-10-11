@@ -6,34 +6,30 @@ load report/clumped_plate_randomloads/modal_shape_dis_randomloads.rpt
 load report/clumped_plate_randomloads/modal_shape_strain_randomloads.rpt
 load report/clumped_plate_randomloads/strain_tot_randomloads.rpt
 load report/clumped_plate_randomloads/omega_randloads.mat
-modal_shape_dis=modal_shape_dis_randomloads;
-modal_shape_strain=modal_shape_strain_randomloads;
-omega=omega_randloads;
-strain=strain_tot_randomloads;
+load report/clumped_plate_randomloads/displ_tot_randomloads.rpt
 
-%_______________________________________________________
-%costruzione vettore colonna deformazioni
-def=zeros(size(strain,1)*3,1);
-n=1;
-for i=1:size(strain,1)
-    def(n:n+2)=strain(i,2:end);
-    n=n+3;
-end
-%_______________________________________________________
+n_measurements=50;
 
+gen = Genetic_forDeformation(modal_shape_dis_randomloads,...
+                             modal_shape_strain_randomloads,...
+                             omega_randloads,...
+                             strain_tot_randomloads,...
+                             displ_tot_randomloads,...
+                             n_measurements);
 %%
 
-i=1;
+
+i=0;
 while true
     % function
     % genetic rappresentation
-    []=gen0_creation(n_measurements);
+    
     % function
     % generate new solution
 
     % function
     % fitness function
-
+    
     % function
     % selection of best solution
 

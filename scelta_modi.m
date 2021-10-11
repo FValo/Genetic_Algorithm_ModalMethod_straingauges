@@ -23,12 +23,11 @@ while true
     E_accumulata=E_accumulata+massimo;
     Ei(num_modi(i))=0;
     
-    if E_accumulata/E_tot>0.9
+    if E_accumulata/E_tot>0.96
         break
     else
         i=i+1;
-    end
-       
+    end      
 end
 
 % forzare inserimento ultimo modo
