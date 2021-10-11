@@ -50,7 +50,7 @@ end
 index=sort( uint64( [strain(:,1).*3-2; strain(:,1).*3-1; strain(:,1).*3] ) );
 index_dis=sort( uint64( [id_nodi.*3-2; id_nodi.*3-1; id_nodi.*3] ) );
 
-index=[35:40, 351:353, 401:403, 451:453]';  %posizioni migliori per misura def
+index=[35:3:50, 351:3:357, 401:3:407, 451:3:457]';  %posizioni migliori per misura def
 
 %_______________________________________________________
 % criterio di selezione modale
@@ -66,4 +66,4 @@ pseudo_inversa = ms_dis(index_dis,modi) / ...
                  ms_str(index,modi)' ;
 w = pseudo_inversa * def(index);
 
-err=100*sqrt(1/1500 * sum( ( (w-displ_value)/max(abs(displ_value)) ).^2 ) );
+err=100*sqrt(1/size(index,1) * sum( ( (w-displ_value)/max(abs(displ_value)) ).^2 ) );

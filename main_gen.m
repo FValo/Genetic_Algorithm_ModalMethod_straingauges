@@ -8,7 +8,7 @@ load report/clumped_plate_randomloads/strain_tot_randomloads.rpt
 load report/clumped_plate_randomloads/omega_randloads.mat
 load report/clumped_plate_randomloads/displ_tot_randomloads.rpt
 
-n_measurements=50;
+n_measurements=20;
 
 gen = Genetic_forDeformation(modal_shape_dis_randomloads,...
                              modal_shape_strain_randomloads,...
@@ -16,34 +16,20 @@ gen = Genetic_forDeformation(modal_shape_dis_randomloads,...
                              strain_tot_randomloads,...
                              displ_tot_randomloads,...
                              n_measurements);
-%%
+ 
+                         
+accuracy = 100;
+iter=1;
 
-
-i=0;
-while true
-    % function
-    % genetic rappresentation
+while iter < 100 && accuracy > 5
+             
+    gen.fitness_function;
+    gen.best_sol;
+    gen.crossover;
+    gen.mutation;
     
-    % function
-    % generate new solution
-
-    % function
-    % fitness function
+    iter=iter+1;
+    accuracy=min(gen.error);
     
-    % function
-    % selection of best solution
-
-    % function
-    % crossover
-
-    % function
-    % mutation
-
-    if i==100
-        break
-    end
-    if accuracy > 0.95
-        break
-    end
-    i=i+1;
+    sol=gen.solution(:,gen.error==min(gen.error));
 end

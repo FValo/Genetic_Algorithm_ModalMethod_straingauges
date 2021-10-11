@@ -12,8 +12,9 @@ classdef Genetic_forDeformation < handle
         
         n_mesaurements;        % number of strain gauges
         solution;              % soluzioni
+        children;              % test solution
         
-        accuracy;
+        error;                 % error of every solution based on fitness
     end
     
     methods
@@ -47,7 +48,7 @@ classdef Genetic_forDeformation < handle
             obj.n_mesaurements=n_mesaurements;
             
             % generate random parents
-            n_parents=10;
+            n_parents=10;               %PARAMETER TO BE MADE VARIABLE 
             obj.solution=zeros(size(obj.strain_value, 1) , n_parents );
             for i=1:n_parents
                 obj.solution(:,i)=random_solution(length(obj.strain_value),n_mesaurements);
@@ -58,7 +59,7 @@ classdef Genetic_forDeformation < handle
         %__________________________________________________________________
         function fitness_function(obj)
             
-            obj.accuracy = zeros(size(obj.solution,2),1);
+            obj.error = zeros(size(obj.solution,2),1);
             
             for i=1:size(obj.solution,2)
                 
@@ -72,7 +73,7 @@ classdef Genetic_forDeformation < handle
                 
                 % fitness function: error for every configuration of strain
                 % gauges respect to exact displacement from fem
-                obj.accuracy(i)=100*sqrt(1/obj.n_mesaurements * ...
+                obj.error(i)=100*sqrt(1/obj.n_mesaurements * ...
                     sum( ( (w-obj.displ_value)/max(abs(obj.displ_value)) ).^2 ) );
             end 
         end
@@ -80,7 +81,59 @@ classdef Genetic_forDeformation < handle
         % choose best solution
         %__________________________________________________________________
         function best_sol(obj)
+            obj.children=zeros(size(obj.solution));
+            
+            err=obj.error;
+            % three best parents ever
+            err(err==min(err))=100;
+            err(err==min(err))=100;
+            err(err==min(err))=100;
+            
+                                    
+            obj.children(:, 1:3 ) = obj.solution(:,err==100);
         end
+        
+        % crossever function
+        %__________________________________________________________________
+        function crossover(obj)
+            mid=ceil ( size(obj.children,1)/2 );
+            
+            obj.children(:,4)=[ obj.children(1:mid,1) ; obj.children(mid+1:end,2) ];
+            obj.children(:,5)=[ obj.children(1:mid,2) ; obj.children(mid+1:end,1) ];
+            obj.children(:,6)=[ obj.children(1:mid,1) ; obj.children(mid+1:end,3) ];
+            obj.children(:,7)=[ obj.children(1:mid,3) ; obj.children(mid+1:end,1) ];
+            obj.children(:,8)=[ obj.children(1:mid,3) ; obj.children(mid+1:end,2) ];
+            obj.children(:,9)=[ obj.children(1:mid,2) ; obj.children(mid+1:end,3) ];
+            obj.children(:,10)=[ obj.children(1:mid*2/3,1) ; ...
+                obj.children(mid*2/3+1:mid*4/3,2); obj.children(mid*4/3+1:end,2) ];
+        end
+        
+        % mutation function
+        %__________________________________________________________________
+        function mutation(obj)
+            % change the children solutions so that each has a number of 1 egual to n_mesaurements
+            
+            for i=4:10
+                
+                diff = sum(obj.children(:,i)) - obj.n_mesaurements;
+                
+                if diff > 0
+                    index=find(obj.children(:,i)==1);
+                    rand_index=unique( index( randi(length(index),length(index),1,'uint32') ), 'stable' );
+                    
+                    obj.children( rand_index(1:diff) ,i) = 0;
+                    
+                elseif diff < 0
+                    index=find(obj.children(:,i)==0);
+                    rand_index=unique( index( randi(length(index),length(index),1,'uint32') ), 'stable' );
+                    
+                    obj.children( rand_index(1:abs(diff)) ,i) = 1;                  
+                end
+            end
+            
+            obj.solution=obj.children;
+        end
+        
     end
 end
 
