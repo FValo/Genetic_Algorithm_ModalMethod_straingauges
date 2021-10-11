@@ -9,10 +9,6 @@ id_nodi=(1:561)';    % nodi dei quali si vuole la risposta spostamento
 %______________________________________________________
 % report estratti da patran
 while true 
-% load report/clumped_plate/modal_shape_dis.rpt
-% load report/clumped_plate/modal_shape_strain.rpt
-% load report/clumped_plate/strain_tot.rpt
-% load report/clumped_plate/omega.mat
 
 load report/clumped_plate_randomloads/modal_shape_dis_randomloads.rpt
 load report/clumped_plate_randomloads/modal_shape_strain_randomloads.rpt
@@ -23,14 +19,6 @@ modal_shape_strain=modal_shape_strain_randomloads;
 omega=omega_randloads;
 strain=strain_tot_randomloads;
 
-% load report/semiala/modal_shape_dis_semiala.rpt
-% load report/semiala/modal_shape_strain_dorsosemiala.rpt
-% load report/semiala/strain_dorsosemiala.rpt
-% load report/semiala/omega_semiala.mat
-% modal_shape_dis=modal_shape_dis_semiala;
-% modal_shape_strain=modal_shape_strain_dorsosemiala;
-% omega=omega_semiala;
-% strain=strain_dorsosemiala;
 break
 end
 %______________________________________________________
