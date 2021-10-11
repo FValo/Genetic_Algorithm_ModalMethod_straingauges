@@ -61,11 +61,12 @@ classdef Genetic_forDeformation < handle
             
             obj.error = zeros(size(obj.solution,2),1);
             
-            for i=1:size(obj.solution,2)
+            for i=1:size(obj.solution,2)              % size(obj.solution,2) = n_parents
                 
                 index= find( obj.solution(:,i) == 1 );
-                [modi] = shape_choice(obj.ms_strain(index,:),obj.strain_value(index),obj.omega);
-                
+%                 [modi] = shape_choice(obj.ms_strain(index,:),obj.strain_value(index),obj.omega);
+                modi=[1 2 3 4 5 11];
+
                 pseudo_invers = obj.ms_displ(:,modi) / ...
                                 ( obj.ms_strain(index,modi)' * obj.ms_strain(index,modi) ) * ...
                                  obj.ms_strain(index,modi)' ;
@@ -84,13 +85,23 @@ classdef Genetic_forDeformation < handle
             obj.children=zeros(size(obj.solution));
             
             err=obj.error;
-            % three best parents ever
-            err(err==min(err))=100;
-            err(err==min(err))=100;
-            err(err==min(err))=100;
+            % three best parents ever            
+            err(err==min(err))=3000;
             
+            index=find(err==3000,3);
+            if length(index) == 1
+                err(err==min(err))=2000;
+                index(2:3)=find(err==2000,2);
+            elseif length(index) == 2
+                err(err==min(err))=2000;
+                index(3)=find(err==2000,1);
+            end
+            if length(index) == 2
+                err(err==min(err))=1000;
+                index(3)=find(err==1000,1);
+            end
                                     
-            obj.children(:, 1:3 ) = obj.solution(:,err==100);
+            obj.children(:, 1:3 ) = obj.solution(:,index);
         end
         
         % crossever function
