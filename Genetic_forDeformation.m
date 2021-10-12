@@ -8,7 +8,7 @@ classdef Genetic_forDeformation < handle
         displ_value;           % static displacement
         ms_displ;              % displacement modal shapes
         ms_strain;             % strain modal shapes
-        omega;                 % pulsations of modal shapes
+        modi;                  % chosen modal shapes
         
         n_mesaurements;        % number of strain gauges
         solution;              % soluzioni
@@ -39,12 +39,15 @@ classdef Genetic_forDeformation < handle
             end
             
             num_modi_tot=length(omega);
+            
             % create modal shape matrix [m x n], 
             % m: gdl, n: number of mode shape
             [obj.ms_displ] = modal_shape_matrix(  modal_shape_dis,    num_modi_tot );
             [obj.ms_strain] = modal_shape_matrix( modal_shape_strain,  num_modi_tot );
             
-            obj.omega=omega;
+            % chose of best modal shapes
+            [obj.modi] = shape_choice(obj.ms_strain,obj.strain_value,omega);
+
             obj.n_mesaurements=n_mesaurements;
             
             % generate random parents
@@ -53,23 +56,22 @@ classdef Genetic_forDeformation < handle
             for i=1:n_parents
                 obj.solution(:,i)=random_solution(length(obj.strain_value),n_mesaurements);
             end
+            
+            %inizializate error vector
+            obj.error = zeros(size(obj.solution,2),1);
         end
         
         % fitness function
         %__________________________________________________________________
         function fitness_function(obj)
             
-            obj.error = zeros(size(obj.solution,2),1);
-            
             for i=1:size(obj.solution,2)              % size(obj.solution,2) = n_parents
                 
                 index= find( obj.solution(:,i) == 1 );
-%                 [modi] = shape_choice(obj.ms_strain(index,:),obj.strain_value(index),obj.omega);
-                modi=[1 2 3 4 5 11];
 
-                pseudo_invers = obj.ms_displ(:,modi) / ...
-                                ( obj.ms_strain(index,modi)' * obj.ms_strain(index,modi) ) * ...
-                                 obj.ms_strain(index,modi)' ;
+                pseudo_invers = obj.ms_displ(:,obj.modi) / ...
+                                ( obj.ms_strain(index,obj.modi)' * obj.ms_strain(index,obj.modi) ) * ...
+                                 obj.ms_strain(index,obj.modi)' ;
                 w = pseudo_invers * obj.strain_value(index);   
                 
                 % fitness function: error for every configuration of strain
@@ -86,22 +88,26 @@ classdef Genetic_forDeformation < handle
             
             err=obj.error;
             % three best parents ever            
-            err(err==min(err))=3000;
             
-            index=find(err==3000,3);
-            if length(index) == 1
-                err(err==min(err))=2000;
-                index(2:3)=find(err==2000,2);
-            elseif length(index) == 2
-                err(err==min(err))=2000;
-                index(3)=find(err==2000,1);
-            end
-            if length(index) == 2
-                err(err==min(err))=1000;
-                index(3)=find(err==1000,1);
+            cont=1;
+            minus=1000;
+            index=[0 0 0];
+            while cont <= 3
+                
+                for i=1:10
+                    if err(i) < minus
+                        minus = err(i);
+                        in=i;
+                    end
+                end
+                
+                index(cont)=in;
+                minus=1000;
+                err(in)=1000;
+                cont=cont+1;
             end
                                     
-            obj.children(:, 1:3 ) = obj.solution(:,index);
+            obj.children(:, [1 9 10] ) = obj.solution(:,index);
         end
         
         % crossever function
@@ -109,14 +115,15 @@ classdef Genetic_forDeformation < handle
         function crossover(obj)
             mid=ceil ( size(obj.children,1)/2 );
             
-            obj.children(:,4)=[ obj.children(1:mid,1) ; obj.children(mid+1:end,2) ];
-            obj.children(:,5)=[ obj.children(1:mid,2) ; obj.children(mid+1:end,1) ];
-            obj.children(:,6)=[ obj.children(1:mid,1) ; obj.children(mid+1:end,3) ];
-            obj.children(:,7)=[ obj.children(1:mid,3) ; obj.children(mid+1:end,1) ];
-            obj.children(:,8)=[ obj.children(1:mid,3) ; obj.children(mid+1:end,2) ];
-            obj.children(:,9)=[ obj.children(1:mid,2) ; obj.children(mid+1:end,3) ];
-            obj.children(:,10)=[ obj.children(1:mid*2/3,1) ; ...
-                obj.children(mid*2/3+1:mid*4/3,2); obj.children(mid*4/3+1:end,2) ];
+            obj.children(:,2)=[ obj.children(1:mid,1) ; obj.children(mid+1:end,2) ];
+            obj.children(:,3)=[ obj.children(1:mid,2) ; obj.children(mid+1:end,1) ];
+            obj.children(:,4)=[ obj.children(1:mid,1) ; obj.children(mid+1:end,3) ];
+            obj.children(:,5)=[ obj.children(1:mid,3) ; obj.children(mid+1:end,1) ];          
+            obj.children(:,6)=[ obj.children(1:mid,3) ; obj.children(mid+1:end,2) ];
+            obj.children(:,7)=[ obj.children(1:mid,2) ; obj.children(mid+1:end,3) ];           
+            obj.children(:,8)=[ obj.children(1:floor(mid*2/3),1) ; ...
+                                obj.children(floor(mid*2/3)+1:floor(mid*4/3),2); ...
+                                obj.children(floor(mid*4/3)+1:end,2) ];
         end
         
         % mutation function

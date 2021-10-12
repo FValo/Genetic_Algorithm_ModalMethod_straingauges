@@ -23,7 +23,7 @@ while true
     E_accumulata=E_accumulata+massimo;
     Ei(num_modi(i))=0;
     
-    if E_accumulata/E_tot>0.96
+    if E_accumulata/E_tot>0.99
         break
     else
         i=i+1;
