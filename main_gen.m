@@ -24,10 +24,10 @@ load report/semiala_beam/omega_semialabeam.mat
 load report/semiala_beam/displ_tot_semialabeam.rpt
 break
 end
-n_measurements=4;              % number of strain gauges available
-requested_precision=0.1;       % error of sol, calculated by fitness function
+n_measurements=50;              % number of strain gauges available
+requested_precision=0.16;       % error of sol, calculated by fitness function
 max_iter=300;                   % maximum number of generation
-n_parents=100;                   % number of solution for each generation
+n_parents=20;                   % number of solution for each generation
 %__________________________________________________________________________
 
 tic
@@ -67,6 +67,8 @@ while true % iter < max_iter && accuracy > requested_precision
     iter=iter+1;
     
     plot(iter,accuracy,'bo');
+    xlabel('# generation');
+    ylabel('% error')
     hold on
     grid on
     pause(0.001)

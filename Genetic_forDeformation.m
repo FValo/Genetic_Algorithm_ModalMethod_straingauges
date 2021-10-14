@@ -10,12 +10,13 @@ classdef Genetic_forDeformation < handle
         ms_strain;             % strain modal shapes
         modi;                  % chosen modal shapes
         
+        n_parents;             % number of individuals in each generation
         n_mesaurements;        % number of strain gauges
         solution;              % soluzioni
         children;              % test solution
         
         error;                 % error of every solution based on fitness
-        n_parents;             % number of individuals in each generation
+        displ_calculated;      % static displacement calculated
     end
     
     methods
@@ -66,6 +67,7 @@ classdef Genetic_forDeformation < handle
         % fitness function
         %__________________________________________________________________
         function fitness_function(obj)
+            min=100;
             
             for i=1:size(obj.solution,2)              % size(obj.solution,2) = n_parents
                 
@@ -80,7 +82,14 @@ classdef Genetic_forDeformation < handle
                 % gauges respect to exact displacement from fem
                 obj.error(i)=100*sqrt( 1/length(w) * ...
                     sum( ( (w-obj.displ_value)/max(abs(obj.displ_value)) ).^2 ) );
-            end 
+                
+                if obj.error(i) < min
+                    min = obj.error(i);
+                    obj.displ_calculated=w;   % save result
+                end
+            end
+            
+            
         end
         
         % choose best solution, % best parents ever
