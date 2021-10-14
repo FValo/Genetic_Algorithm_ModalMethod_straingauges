@@ -24,8 +24,8 @@ load report/semiala_beam/omega_semialabeam.mat
 load report/semiala_beam/displ_tot_semialabeam.rpt
 break
 end
-n_measurements=8;
-requested_precision=5;       % error of sol, calculated by fitness function
+n_measurements=10;
+requested_precision=0.01;       % error of sol, calculated by fitness function
 max_iter=300;                % maximum number of generation
 %__________________________________________________________________________
 
@@ -46,28 +46,43 @@ gen = Genetic_forDeformation(modal_shape_dis_semialabeam,...
 accuracy = 100;
 iter=0;
 
-while iter < max_iter && accuracy > requested_precision
+while true % iter < max_iter && accuracy > requested_precision
              
     gen.fitness_function;
-    gen.best_sol;
-    gen.crossover;
-    gen.mutation;
     
-    iter=iter+1;
     accuracy=min(gen.error);
     
     if iter >= max_iter || accuracy <= requested_precision
         sol=gen.solution(:,gen.error==min(gen.error));
         strain_gauges=ceil(find(sol(:,1)==1)/3);
+        break
     end
+    
+    gen.best_sol;
+    gen.crossover;
+    gen.mutation;
+    iter=iter+1;
     
     plot(iter,accuracy,'bo');
     hold on
-    plot([0 iter],[requested_precision requested_precision]);
     grid on
+    plot([0 iter],[requested_precision requested_precision]);
     pause(0.001)
 end
-toc
 
-disp(['exit at generation number: ',num2str(iter)])
-disp(['with an error of: ',num2str(accuracy),' %'])
+plot(iter,accuracy,'bo');
+
+
+if iter == max_iter
+    disp('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    toc; disp(' ');
+    disp(['Exit for reaching maximum generation: ',num2str(iter)]);
+    disp(['with an error of: ',num2str(accuracy),' %'])
+    disp('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+else
+    disp('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    toc; disp(' ');
+    disp(['Exit for reaching required accuracy, error: ',num2str(accuracy),' %']);
+    disp(['Generation: ',num2str(iter)]);
+    disp('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+end

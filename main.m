@@ -63,7 +63,7 @@ index=sort( uint64( [strain(:,1).*3-2; strain(:,1).*3-1; strain(:,1).*3] ) );
 index_dis=sort( uint64( [id_nodi.*3-2; id_nodi.*3-1; id_nodi.*3] ) );
 
 % index=[43 121 227 307 406 486 1405]';  %posizioni migliori per misura def, clumped plate
-
+index=[1 132 206 249 704 721 724 777 1006 1288]'; %semiala
 %_______________________________________________________
 % criterio di selezione modale
 % determinazione modi più significativi
@@ -79,4 +79,4 @@ pseudo_inversa = ms_dis(index_dis,modi) / ...
                  ms_str(index,modi)' ;
 w = pseudo_inversa * def(index);
 
-err=100*sqrt(1/size(index,1) * sum( ( (w-displ_value)/max(abs(displ_value)) ).^2 ) );
+err=100*sqrt(1/length(w) * sum( ( (w-displ_value)/max(abs(displ_value)) ).^2 ) );

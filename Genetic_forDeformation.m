@@ -76,7 +76,7 @@ classdef Genetic_forDeformation < handle
                 
                 % fitness function: error for every configuration of strain
                 % gauges respect to exact displacement from fem
-                obj.error(i)=100*sqrt(1/obj.n_mesaurements * ...
+                obj.error(i)=100*sqrt( 1/length(w) * ...
                     sum( ( (w-obj.displ_value)/max(abs(obj.displ_value)) ).^2 ) );
             end 
         end
