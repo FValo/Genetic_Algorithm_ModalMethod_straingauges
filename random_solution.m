@@ -5,10 +5,11 @@ sol=randi(length_sol*100,length_sol,1,'uint32');
 
 i=1;
 while true
-    sol(sol==max(sol))=1;            % maximum of sol is set egual to 1
+    ind= sol==max(sol) ;
+    sol( ind )=1;            % maximum of sol is set egual to 1
     cont=sum(sol==1);                % count number of 1 in sol
     
-    if cont == n_mesaurements
+    if cont >= n_mesaurements
         break
     end
     if i > n_mesaurements

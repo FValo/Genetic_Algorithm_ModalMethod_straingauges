@@ -83,16 +83,17 @@ classdef Genetic_forDeformation < handle
             end 
         end
         
-        % choose best solution
+        % choose best solution, % best parents ever
         %__________________________________________________________________
-        function best_sol(obj)
+        function best_sol(obj)    
             obj.children=zeros(size(obj.solution));
             
-            % best parents ever
             [~, ord]=sort(obj.error);
             
-            % save the 5 best parents in position=[end-4 end-3 end-2 end-1 end]
-            obj.children(:, 1:end ) = obj.solution(:,ord);
+            % ranking of best parents from 1 to n_parents, first 5 are
+            % retained for the next generation without crossover
+            obj.solution(:, 1:end ) = obj.solution(:,ord);
+            obj.children(:, 1:5 ) = obj.solution(:, 1:5 );
         end
         
         % crossever function
@@ -102,12 +103,25 @@ classdef Genetic_forDeformation < handle
             
             prob=ceil(1./(1:obj.n_parents)*100)+20;
             
-            for i=6:obj.n_parents
+            for i=6:obj.n_parents-1
                 
+                % pick two random indexs
                 y = randsample(obj.n_parents,2,true,prob);    
                 
-                obj.children(:,i)=[ obj.children(1:mid,y(1)) ; obj.children(mid+1:end,y(2)) ];
+                % avoid repetition
+                if y(1) == y(2)
+                    if y(1) ~= obj.n_parents
+                        y(1) = obj.n_parents;
+                    else
+                        y(1) = obj.n_parents-1;
+                    end
+                end
+                    
+                obj.children(:,i)=[ obj.solution(1:mid,y(1)) ; obj.solution(mid+1:end,y(2)) ];
             end
+            
+            % last chils is completely new, randomly generate
+            obj.children(:,end)=random_solution(length(obj.strain_value),obj.n_mesaurements);
             
         end
         
@@ -116,7 +130,7 @@ classdef Genetic_forDeformation < handle
         function mutation(obj)
             % change the children solutions so that each has a number of 1 egual to n_mesaurements
             
-            for i=6:obj.n_parents
+            for i=6:obj.n_parents-1
                 
                 diff = sum(obj.children(:,i)) - obj.n_mesaurements;
                 
