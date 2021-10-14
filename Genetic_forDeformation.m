@@ -15,13 +15,14 @@ classdef Genetic_forDeformation < handle
         children;              % test solution
         
         error;                 % error of every solution based on fitness
+        n_parents;             % number of individuals in each generation
     end
     
     methods
         
         % Inizialization
         %__________________________________________________________________
-        function obj = Genetic_forDeformation(modal_shape_dis,modal_shape_strain,omega,strain,displ,n_mesaurements)
+        function obj = Genetic_forDeformation(modal_shape_dis,modal_shape_strain,omega,strain,displ,n_mesaurements,n_parents)
             
             % transform strain from matrix to column vector rappresentation
             obj.strain_value=zeros(size(strain,1)*3,1);
@@ -51,9 +52,10 @@ classdef Genetic_forDeformation < handle
             obj.n_mesaurements=n_mesaurements;
             
             % generate random parents
-            n_parents=10;               %PARAMETER TO BE MADE VARIABLE 
-            obj.solution=zeros(size(obj.strain_value, 1) , n_parents );
-            for i=1:n_parents
+            obj.n_parents=n_parents;
+            
+            obj.solution=zeros(size(obj.strain_value, 1) , obj.n_parents );
+            for i=1:obj.n_parents
                 obj.solution(:,i)=random_solution(length(obj.strain_value),n_mesaurements);
             end
             
@@ -86,28 +88,11 @@ classdef Genetic_forDeformation < handle
         function best_sol(obj)
             obj.children=zeros(size(obj.solution));
             
-            err=obj.error;
-            % three best parents ever            
+            % best parents ever
+            [~, ord]=sort(obj.error);
             
-            cont=1;
-            minus=1000;
-            index=[0 0 0];
-            while cont <= 3
-                
-                for i=1:10
-                    if err(i) < minus
-                        minus = err(i);
-                        in=i;
-                    end
-                end
-                
-                index(cont)=in;
-                minus=1000;
-                err(in)=1000;
-                cont=cont+1;
-            end
-                                    
-            obj.children(:, [1 9 10] ) = obj.solution(:,index);
+            % save the 5 best parents in position=[end-4 end-3 end-2 end-1 end]
+            obj.children(:, 1:end ) = obj.solution(:,ord);
         end
         
         % crossever function
@@ -115,15 +100,15 @@ classdef Genetic_forDeformation < handle
         function crossover(obj)
             mid=ceil ( size(obj.children,1)/2 );
             
-            obj.children(:,2)=[ obj.children(1:mid,1) ; obj.children(mid+1:end,2) ];
-            obj.children(:,3)=[ obj.children(1:mid,2) ; obj.children(mid+1:end,1) ];
-            obj.children(:,4)=[ obj.children(1:mid,1) ; obj.children(mid+1:end,3) ];
-            obj.children(:,5)=[ obj.children(1:mid,3) ; obj.children(mid+1:end,1) ];          
-            obj.children(:,6)=[ obj.children(1:mid,3) ; obj.children(mid+1:end,2) ];
-            obj.children(:,7)=[ obj.children(1:mid,2) ; obj.children(mid+1:end,3) ];           
-            obj.children(:,8)=[ obj.children(1:floor(mid*2/3),1) ; ...
-                                obj.children(floor(mid*2/3)+1:floor(mid*4/3),2); ...
-                                obj.children(floor(mid*4/3)+1:end,2) ];
+            prob=ceil(1./(1:obj.n_parents)*100)+20;
+            
+            for i=6:obj.n_parents
+                
+                y = randsample(obj.n_parents,2,true,prob);    
+                
+                obj.children(:,i)=[ obj.children(1:mid,y(1)) ; obj.children(mid+1:end,y(2)) ];
+            end
+            
         end
         
         % mutation function
@@ -131,7 +116,7 @@ classdef Genetic_forDeformation < handle
         function mutation(obj)
             % change the children solutions so that each has a number of 1 egual to n_mesaurements
             
-            for i=4:10
+            for i=6:obj.n_parents
                 
                 diff = sum(obj.children(:,i)) - obj.n_mesaurements;
                 
