@@ -74,9 +74,9 @@ index=[1 132 206 249 704 721 724 777 1006 1288]'; %semiala
 
 % calcolo spostamenti
 % w = phi_d * INV( phi_s^T * phi_s ) * phi_s^T   *   eps
-pseudo_inversa = ms_dis(index_dis,modi) / ...
-                ( ms_str(index,modi)' * ms_str(index,modi) ) * ...
-                 ms_str(index,modi)' ;
-w = pseudo_inversa * def(index);
+
+w = ms_dis(index_dis,modi) * pinv(ms_str(index,modi)) * def(index);
+
+
 
 err=100*sqrt(1/length(w) * sum( ( (w-displ_value)/max(abs(displ_value)) ).^2 ) );

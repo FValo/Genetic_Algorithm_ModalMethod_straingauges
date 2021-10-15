@@ -72,11 +72,10 @@ classdef Genetic_forDeformation < handle
             for i=1:size(obj.solution,2)              % size(obj.solution,2) = n_parents
                 
                 index= find( obj.solution(:,i) == 1 );
-
-                pseudo_invers = obj.ms_displ(:,obj.modi) / ...
-                                ( obj.ms_strain(index,obj.modi)' * obj.ms_strain(index,obj.modi) ) * ...
-                                 obj.ms_strain(index,obj.modi)' ;
-                w = pseudo_invers * obj.strain_value(index);   
+                
+                % pinv(): Moore-Penrose Pseudoinverse of modal_shape_strain
+                w = obj.ms_displ(:,obj.modi) * pinv( obj.ms_strain(index,obj.modi)) * ...
+                    obj.strain_value(index);   
                 
                 % fitness function: error for every configuration of strain
                 % gauges respect to exact displacement from fem
