@@ -1,5 +1,7 @@
 report
 scelta_modi.m
 main.m
+print_result.m
 quadmesh.m
+license_quadmesh.txt
 *.asv
